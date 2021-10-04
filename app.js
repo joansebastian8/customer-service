@@ -5,7 +5,24 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
+
 var app = express();
+
+//Swagger Configuration  
+const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      title: 'Customers API',
+      version: '1.0.0'
+    }
+  },
+  apis: ['./modules/customer/customer.controller.js'],
+}
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
 
 var MongoDBUtil = require('./modules/mongodb/mongodb.module').MongoDBUtil;
 var CustomerController = require('./modules/customer/customer.module')().CustomerController;
