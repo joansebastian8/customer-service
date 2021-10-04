@@ -1,5 +1,6 @@
 var createError = require('http-errors');
 var express = require('express');
+var cors = require("cors");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -15,7 +16,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 MongoDBUtil.init();
-
+app.use(cors());
 app.use('/customers', CustomerController);
 
 app.get('/', function (req, res) {
@@ -45,5 +46,6 @@ app.use(function (err, req, res, next) {
     error: res.locals.error
   });
 });
+
 
 module.exports = app;
