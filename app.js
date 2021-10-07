@@ -1,10 +1,28 @@
 var createError = require('http-errors');
 var express = require('express');
+var cors = require("cors");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
+
 var app = express();
+
+//Swagger Configuration  
+const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      title: 'Customers API',
+      version: '1.0.0'
+    }
+  },
+  apis: ['./modules/customer/customer.controller.js'],
+}
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
 
 var MongoDBUtil = require('./modules/mongodb/mongodb.module').MongoDBUtil;
 var CustomerController = require('./modules/customer/customer.module')().CustomerController;
@@ -15,7 +33,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 MongoDBUtil.init();
-
+app.use(cors());
 app.use('/customers', CustomerController);
 
 app.get('/', function (req, res) {
@@ -45,5 +63,6 @@ app.use(function (err, req, res, next) {
     error: res.locals.error
   });
 });
+
 
 module.exports = app;
