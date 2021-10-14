@@ -1,3 +1,4 @@
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var cors = require("cors");
@@ -8,8 +9,9 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUI = require('swagger-ui-express');
 const admin = require("firebase-admin");
 
-const serviceAccount = require("./config/firebase/customers-dev-82c7d-firebase-adminsdk-i8vt8-f3f87fae2b.json");
 
+const serviceAccount =  require("./config/firebase/firebasesdk-config").firebaseConfig;
+// const serviceAccount = require("./config/firebase/customers-dev-82c7d-firebase-adminsdk-i8vt8-f3f87fae2b.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -48,10 +50,10 @@ function checkAuth(req, res, next) {
       .then(() => {
         next()
       }).catch((error) => {
-        res.status(403).send('Unauthorized')
+        res.status(403).send('Forbidden');
       });
   } else {
-    res.status(403).send('Unauthorized')
+    res.status(401).send('Unauthorized');
   }
 }
 
