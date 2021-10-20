@@ -1,12 +1,20 @@
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var cors = require("cors");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUI = require('swagger-ui-express');
+const admin = require("firebase-admin");
+
+
+const serviceAccount =  require("./config/firebase/firebasesdk-config").firebaseConfig;
+// const serviceAccount = require("./config/firebase/customers-dev-82c7d-firebase-adminsdk-i8vt8-f3f87fae2b.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 var app = express();
 
@@ -34,6 +42,23 @@ app.use(cookieParser());
 
 MongoDBUtil.init();
 app.use(cors());
+
+function checkAuth(req, res, next) {
+  if (req.headers?.authorization?.startsWith('Bearer ')) {
+    const idToken = req.headers.authorization.split('Bearer ')[1];
+    admin.auth().verifyIdToken(idToken)
+      .then(() => {
+        next()
+      }).catch((error) => {
+        res.status(403).send('Forbidden');
+      });
+  } else {
+    res.status(401).send('Unauthorized');
+  }
+}
+
+app.use('*', checkAuth)
+
 app.use('/customers', CustomerController);
 
 app.get('/', function (req, res) {
